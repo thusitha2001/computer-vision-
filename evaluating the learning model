@@ -1,0 +1,51 @@
+% Load the digits dataset 
+[XTrain, YTrain] = digitTrain4DArrayData; 
+[XTest, YTest] = digitTest4DArrayData; 
+ 
+% Convert categorical labels to numeric (0–9) 
+YTrain = grp2idx(YTrain) - 1; 
+YTest  = grp2idx(YTest) - 1; 
+ 
+% Downsample images to 8x8 (to match sklearn digits dataset) 
+XTrainSmall = imresize(XTrain, [8 8]); 
+XTestSmall  = imresize(XTest, [8 8]); 
+ 
+% Flatten images into feature vectors 
+nTrain = size(XTrainSmall, 4); 
+nTest  = size(XTestSmall, 4); 
+ 
+XTrainFlat = reshape(XTrainSmall, [8*8, nTrain])'; 
+XTestFlat  = reshape(XTestSmall,  [8*8, nTest])'; 
+ 
+% Train a Random Forest classifier (TreeBagger in MATLAB) 
+numTrees = 100; 
+model = TreeBagger(numTrees, XTrainFlat, YTrain, 'Method', 'classification'); 
+ 
+% Predict on test data 
+yPred = str2double(predict(model, XTestFlat)); 
+ 
+% Accuracy 
+accuracy = sum(yPred == YTest) / numel(YTest); 
+ 
+% Confusion matrix 
+confMat = confusionmat(YTest, yPred); 
+ 
+% Precision, Recall, F1 per class 
+precision = diag(confMat) ./ sum(confMat, 1)';   % per class 
+recall    = diag(confMat) ./ sum(confMat, 2);   % per class 
+f1        = 2 * (precision .* recall) ./ (precision + recall); 
+ 
+% Handle NaN values (if division by zero) 
+precision(isnan(precision)) = 0; 
+recall(isnan(recall)) = 0; 
+f1(isnan(f1)) = 0; 
+ 
+% Create summary table (class-wise metrics) 
+ClassID = (0:9)'; % digits 0–9 
+resultsTable = table(ClassID, precision, recall, f1); 
+ 
+% Display accuracy separately in a table 
+accuracyTable = table(accuracy, 'VariableNames', {'Accuracy'}); 
+ 
+disp('Overall Accuracy:'); 
+disp(accuracyTable); 
