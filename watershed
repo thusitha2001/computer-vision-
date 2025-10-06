@@ -1,0 +1,75 @@
+clc; 
+clear; 
+close all; 
+ 
+% Step 1: Load image 
+img = imread("C:\Users\DEll Two Two\Pictures\Saved Pictures\nature.jpg"); 
+img = im2double(img); 
+ 
+% Step 2: Gradient magnitude 
+intensity = rgb2gray(img); 
+gmag = imgradient(intensity); 
+ 
+% Step 3: Define colors 
+fixedColors = [ 
+    1 0 0;    % Red 
+    0 1 0;    % Green 
+    0 0 1;    % Blue 
+    1 1 0;    % Yellow 
+    1 0 1;    % Magenta 
+    0 1 1;    % Cyan 
+    1 1 1;    % White 
+    0 0 0     % Black 
+]; 
+ 
+% Step 4: Draw markers 
+figure, imshow(img), title('Draw markers (double-click to finish each region)'); 
+hold on; 
+markerMask = zeros(size(intensity)); 
+numMarkers = input('Enter number of regions to segment (max 8): '); 
+if numMarkers > 8 
+    error('You can only have up to 8 regions.'); 
+end 
+markerColors = fixedColors(1:numMarkers, :); 
+ 
+for i = 1:numMarkers 
+    h = drawfreehand('Color', markerColors(i,:)); 
+    mask = createMask(h); 
+    markerMask(mask) = i; 
+end 
+ 
+figure, imshow(label2rgb(markerMask, markerColors, 'k')), title('User Markers'); 
+ 
+% Step 5: Watershed 
+L = watershed(imimposemin(gmag, markerMask)); 
+ 
+% Step 6: Map watershed regions to marker IDs 
+regionColors = zeros(max(L(:)), 3); 
+for region = 1:max(L(:)) 
+    mask = (L == region); 
+    markerIDs = markerMask(mask); 
+    markerIDs(markerIDs == 0) = []; % Remove background 
+    if ~isempty(markerIDs) 
+        assignedID = mode(markerIDs); % Majority marker 
+        regionColors(region,:) = markerColors(assignedID,:); 
+    else 
+        regionColors(region,:) = [0.5 0.5 0.5]; % Default gray for unmarked regions 
+    end 
+end 
+ 
+% Step 7: Paint segmentation 
+segRGB = zeros(size(img)); 
+for region = 1:max(L(:)) 
+    mask = (L == region); 
+    for ch = 1:3 
+        segRGB(:,:,ch) = segRGB(:,:,ch) + mask * regionColors(region,ch); 
+    end 
+end 
+ 
+% Step 8: Blend overlay 
+alpha = 0.4; 
+overlay = (1-alpha)*img + alpha*segRGB; 
+boundaries = (L == 0); 
+overlay(repmat(boundaries, [1,1,3])) = 1; 
+ 
+figure, imshow(overlay), title('Watershed Segmentation with Fixed Colors'); 
