@@ -1,0 +1,46 @@
+% Histogram Equalization 
+ 
+clc; 
+clear; 
+close all; 
+ 
+% Read the grayscale image 
+img = imread("C:\Users\DEll Two Two\Pictures\Saved Pictures\gong-yoo-profile-1.png");  
+% Replace with your image path 
+if size(img, 3) == 3 
+    img = rgb2gray(img); 
+end 
+ 
+% Histogram Equalization 
+equ = histeq(img); 
+ 
+% Stack images side-by-side 
+res = [img, equ]; 
+ 
+% Display images 
+figure('Name', 'Histogram Equalization'); 
+imshow(res); 
+title('Original Image (Left) and Equalized Image (Right)'); 
+ 
+% Compute histogram and CDF 
+[counts, binLocations] = imhist(img); 
+cdf = cumsum(counts); 
+cdf_normalized = cdf * max(counts) / max(cdf); 
+ 
+% Plot histogram and normalized CDF 
+figure('Name', 'Histogram and CDF'); 
+yyaxis left; 
+bar(binLocations, counts, 'r'); 
+ylabel('Histogram'); 
+ 
+yyaxis right; 
+plot(binLocations, cdf_normalized, 'b', 'LineWidth', 1.5); 
+ylabel('CDF'); 
+ 
+xlabel('Pixel Intensity'); 
+title('Histogram and Normalized CDF'); 
+legend('Histogram', 'Normalized CDF'); 
+xlim([0 255]); 
+grid on; 
+ 
+ 
