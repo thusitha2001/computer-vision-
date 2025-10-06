@@ -1,0 +1,33 @@
+ 
+% Harris Corner Detection in MATLAB 
+% Read the input image 
+filename = "C:\Users\DEll Two Two\Pictures\Saved Pictures\black-and-white-chess-board
+template.jpg"; 
+img = imread(filename); 
+figure, imshow(img), title('Original Image'); 
+% Convert to grayscale safely 
+if size(img, 3) == 3 
+    gray = rgb2gray(img); 
+else 
+    gray = img; 
+end 
+gray = double(gray); 
+% Detect corners using the Harris method 
+cornerStrength = cornermetric(gray, 'Harris'); 
+% Dilate the corners (optional for visualization) 
+se = strel('disk', 1); 
+dilatedCorners = imdilate(cornerStrength, se); 
+% Threshold to find strong corners 
+threshold = 0.01 * max(dilatedCorners(:)); 
+cornerMask = dilatedCorners > threshold; 
+% Visualize corners: mark them in red 
+cornerImg = img; 
+if size(cornerImg, 3) == 1 
+    cornerImg = repmat(cornerImg, [1 1 3]); % convert grayscale to RGB for display 
+end 
+% Create red overlay for corners 
+redOverlay = cat(3, uint8(255 * cornerMask), zeros(size(gray), 'uint8'), zeros(size(gray), 
+'uint8')); 
+cornerImg(cornerMask) = 0;                          % clear red channel where corners are 
+cornerImg(:,:,1) = max(cornerImg(:,:,1), redOverlay(:,:,1)); % enhance red channel 
+figure, imshow(cornerImg), title('Harris Corner Detection');
