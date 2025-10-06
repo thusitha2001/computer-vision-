@@ -1,0 +1,45 @@
+clc; 
+clear; 
+close all; 
+ 
+% Load built-in grayscale image 
+img = imread("C:\Users\DEll Two Two\Pictures\Saved Pictures\harry.jpg"); 
+ 
+% Create 5x5 square structuring element 
+se = strel('square', 5); 
+ 
+% Apply morphological operations 
+erosion = imerode(img, se); 
+dilation = imdilate(img, se); 
+opening = imopen(img, se); 
+closing = imclose(img, se); 
+gradient = imsubtract(dilation, erosion); 
+tophat = imtophat(img, se); 
+blackhat = imbothat(img, se); 
+ 
+% Structuring elements with different shapes 
+se_rect = strel('rectangle', [5 5]); 
+rect_result = imdilate(img, se_rect); 
+ 
+se_ellipse = strel('disk', 3); % Elliptical structuring element 
+ellipse_result = imdilate(img, se_ellipse); 
+ 
+se_cross = strel('line', 5, 90); % Vertical line (cross-like effect) 
+cross_result = imdilate(img, se_cross); 
+% Display all images in a single figure 
+figure('Name', 'Morphological Operations', 'NumberTitle', 'off'); 
+subplot(3,4,1), imshow(img), title('Original'); 
+subplot(3,4,2), imshow(erosion), title('Erosion'); 
+subplot(3,4,3), imshow(dilation), title('Dilation'); 
+subplot(3,4,4), imshow(opening), title('Opening'); 
+ 
+subplot(3,4,5), imshow(closing), title('Closing'); 
+subplot(3,4,6), imshow(gradient), title('Gradient'); 
+subplot(3,4,7), imshow(tophat), title('Top Hat'); 
+subplot(3,4,8), imshow(blackhat), title('Black Hat'); 
+ 
+subplot(3,4,9), imshow(rect_result), title('Rect Shape'); 
+subplot(3,4,10), imshow(ellipse_result), title('Ellipse Shape'); 
+subplot(3,4,11), imshow(cross_result), title('Cross Shape'); 
+ 
+subplot(3,4,12), axis off;
