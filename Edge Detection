@@ -1,0 +1,48 @@
+% Edge Detection using MATLAB 
+
+clc; 
+clear; 
+close all; 
+ 
+% Read image and convert to grayscale 
+img = imread("C:\Users\DEll Two Two\Pictures\Saved Pictures\gong-yoo-profile-1.png");  
+% You can replace with your image 
+original_img = img; 
+gray = rgb2gray(original_img); 
+ 
+% Apply Gaussian Blur 
+gaussian_filtered = imgaussfilt(gray, 1); 
+ 
+% Canny Edge Detection 
+canny_edge = edge(gaussian_filtered, 'Canny'); 
+ 
+% Sobel Edge Detection 
+sobel_edge = edge(gaussian_filtered, 'Sobel'); 
+ 
+% Prewitt Edge Detection 
+prewitt_edge = edge(gaussian_filtered, 'Prewitt'); 
+ 
+% Laplacian of image 
+laplacian_filter = fspecial('laplacian', 0.2); 
+laplacian_edge = imfilter(double(gaussian_filtered), laplacian_filter, 'replicate'); 
+ 
+% LoG (Laplacian of Gaussian) 
+log_edge = edge(gaussian_filtered, 'log'); 
+ 
+% DoG (Difference of Gaussians) 
+gauss1 = imgaussfilt(gray, 1); 
+gauss2 = imgaussfilt(gray, 2); 
+dog = gauss1 - gauss2; 
+dog = mat2gray(dog);  % Normalize for display 
+ 
+% Display all images in one figure 
+figure('Name','Edge Detection Methods','NumberTitle','off'); 
+ 
+subplot(2,4,1), imshow(original_img), title('Original Image'); 
+subplot(2,4,2), imshow(gray), title('Grayscale Image'); 
+subplot(2,4,3), imshow(canny_edge), title('Canny Edge'); 
+subplot(2,4,4), imshow(sobel_edge), title('Sobel Edge'); 
+subplot(2,4,5), imshow(prewitt_edge), title('Prewitt Edge'); 
+subplot(2,4,6), imshow(laplacian_edge, []), title('Laplacian Edge'); 
+subplot(2,4,7), imshow(log_edge), title('LoG Edge'); 
+subplot(2,4,8), imshow(dog, []), title('DoG Edge');
