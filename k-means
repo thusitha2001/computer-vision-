@@ -1,0 +1,65 @@
+function kmeans_gaussian_clustering() 
+    cluster_n = 5; 
+    img_size = 512; 
+    rng('shuffle');  % For random seed 
+ 
+    % Create distinct colors using HSV 
+    hsv_colors = hsv(cluster_n); 
+    colors = uint8(255 * hsv_colors); 
+ 
+    while true 
+        disp('Sampling distributions...'); 
+        [points, ~] = make_gaussians(cluster_n, img_size); 
+ 
+        % Run K-Means 
+        [labels, ~] = kmeans(points, cluster_n, 'MaxIter', 100); 
+ 
+        % Create a blank image 
+        img = zeros(img_size, img_size, 3, 'uint8'); 
+ 
+        % Draw clusters 
+        for i = 1:size(points, 1) 
+            x = round(points(i, 1)); 
+            y = round(points(i, 2)); 
+            if x >= 1 && x <= img_size && y >= 1 && y <= img_size 
+                img(y, x, :) = colors(labels(i), :); 
+            end 
+        end 
+ 
+        imshow(img); 
+        title('K-Means Clustering'); 
+ 
+        % Wait for user key press 
+        k = waitforbuttonpress; 
+        if k == 1  % key pressed 
+            key = get(gcf, 'CurrentCharacter'); 
+            if strcmp(key, char(27))  % ESC key 
+                close; 
+                break; 
+            end 
+        end 
+    end 
+    disp('Done'); 
+end 
+ 
+function [points, labels] = make_gaussians(cluster_n, img_size) 
+    points = []; 
+    labels = []; 
+ 
+    for i = 1:cluster_n 
+        % Random center 
+        center_x = randi([round(img_size*0.25), round(img_size*0.75)]); 
+        center_y = randi([round(img_size*0.25), round(img_size*0.75)]); 
+ 
+        % Random standard deviation 
+        std_dev = randi([10, 40]); 
+ 
+        % Number of points per cluster 
+        num_points = round(img_size / cluster_n * 5); 
+ 
+        % Generate 2D Gaussian points 
+        pts = randn(num_points, 2) * std_dev + [center_x, center_y]; 
+        points = [points; pts]; 
+        labels = [labels; i * ones(num_points, 1)]; 
+    end 
+end
