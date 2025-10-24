@@ -1,0 +1,38 @@
+clc; clear; close all;
+
+% --- Read the input image ---
+url = "https://media.istockphoto.com/id/806894546/vector/checkered-pattern-black-and-white.jpg?s=612x612&w=0&k=20&c=7Z6qshh1PyzfUNb2kYduPf-jiglXn6knqc5h092XRwY=";
+img = imread(url);
+figure, imshow(img), title('Original Image');
+
+% --- Convert to grayscale safely ---
+if size(img, 3) == 3
+    gray = rgb2gray(img);
+else
+    gray = img;
+end
+gray = im2double(gray);
+
+% --- User-adjustable parameters ---
+thresholdScale = 0.01;   % Smaller -> more corners
+markerSize = 20;          % Size of red markers
+neighborhood = 3;        % For non-maximum suppression
+
+% --- Harris corner detection ---
+cornerStrength = cornermetric(gray, 'Harris');
+
+% --- Non-maximum suppression ---
+localMax = imregionalmax(cornerStrength); % keep only local maxima
+cornerMask = (cornerStrength > thresholdScale * max(cornerStrength(:))) & localMax;
+
+% --- Get corner coordinates ---
+[y, x] = find(cornerMask);
+
+% --- Visualize corners on original image ---
+figure, imshow(img), title('Harris Corner Detection');
+hold on;
+plot(x, y, 'r.', 'MarkerSize', markerSize, 'LineWidth', 1.5);
+hold off;
+
+% --- Display corner count ---
+fprintf('Detected %d corners.\n', length(x));
